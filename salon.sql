@@ -251,3 +251,19 @@ ALTER TABLE ONLY public.appointments
 -- PostgreSQL database dump complete
 --
 
+-- Add duration column if not already present
+ALTER TABLE services ADD COLUMN IF NOT EXISTS duration_minutes INT;
+
+-- Update durations
+UPDATE services SET duration_minutes = 30 WHERE name = 'cut';
+UPDATE services SET duration_minutes = 180 WHERE name = 'color';
+UPDATE services SET duration_minutes = 20 WHERE name = 'wash';
+
+-- Add color option column and constraint
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS color_option VARCHAR(10);
+ALTER TABLE appointments ADD CONSTRAINT IF NOT EXISTS valid_color CHECK (
+  color_option IN ('brown', 'red', 'blonde', 'black') OR color_option IS NULL
+);
+
+-- Enforce unique customer/time constraint
+ALTER TABLE appointments ADD CONSTRAINT IF NOT EXISTS unique_customer_time UNIQUE(customer_id, time);
